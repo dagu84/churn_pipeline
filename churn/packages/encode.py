@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
-from churn.packages.params import *
+from packages.params import *
 
-def binary_encode(series: pd.Series) -> pd.Series:
-    if isinstance(series, np.ndarray):
-        series = pd.Series(series)
-    return series.apply(lambda x: 0 if x == 'No' else 1)
+def binary_encode(series: pd.DataFrame) -> np.ndarray:
+    series = pd.DataFrame(series)
+    for i in series:
+        series[i] = series[i].astype(int)
+    return series.values
 
 def cat_encode(series: pd.Series) -> pd.Series:
     if isinstance(series, np.ndarray):
