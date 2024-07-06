@@ -5,8 +5,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, FunctionTransformer
 
-from churn.packages.encode import encode
-from churn.packages.params import *
+from packages.encode import encode, binary_encode
+from packages.params import *
 
 def preprocess_features(X: pd.DataFrame) -> np.ndarray:
     def create_pipeline() -> ColumnTransformer:
@@ -26,7 +26,10 @@ def preprocess_features(X: pd.DataFrame) -> np.ndarray:
         tenure_pipe = make_pipeline(FunctionTransformer(lambda x: (x - tenure_min) / (tenure_max - tenure_min), validate=True))
 
         # Categorical features
-        cat_pipe = make_pipeline(FunctionTransformer(encode, validate=True))
+        cat_pipe = make_pipeline(FunctionTransformer(encode))
+
+        # Binary features
+        bin_pipe = make_pipeline(FunctionTransformer(binary_encode))
 
         # Multi-cat features
         multi_pipe = make_pipeline(OneHotEncoder(handle_unknown='ignore'))
@@ -36,8 +39,9 @@ def preprocess_features(X: pd.DataFrame) -> np.ndarray:
             [
             ("monthly_pipe", monthly_pipe, ['MonthlyCharges']),
             ("tenure_pipe", tenure_pipe, ['tenure']),
-            ("cat_pipe", cat_pipe, ['MultipleLines', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'Partner', 'Dependents', 'PhoneService', 'PaperlessBilling']),
-            ("multi_pipe", multi_pipe, ['Contract', 'PaymentMethod', 'InternetService'])
+            ("cat_pipe", cat_pipe, ['MultipleLines', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']),
+            ("bin_pipe", bin_pipe, ['Partner', 'Dependents', 'PhoneService', 'PaperlessBilling']),
+            ("multi_pipe", multi_pipe, ['Contract', 'PaymentMethod', 'InternetService', 'gender'])
             ],
             n_jobs=-1, remainder='passthrough'
         )
@@ -47,6 +51,7 @@ def preprocess_features(X: pd.DataFrame) -> np.ndarray:
     print(Fore.BLUE + "\nPreprocessing features..." + Style.RESET_ALL)
 
     pipeline = create_pipeline()
+
     X_processed = pipeline.fit_transform(X)
     print("✅ X_processed, with shape", X_processed.shape)
 

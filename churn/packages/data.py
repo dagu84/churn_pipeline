@@ -4,8 +4,9 @@ from pathlib import Path
 from colorama import Fore, Style
 from google.cloud import bigquery
 
-from churn.packages.params import *
+from packages.params import *
 
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/dg/Desktop/DG/data_science/gcp/projects-cloud-425714-64a3c3d9029b.json'
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -13,6 +14,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     - Removes null values
     - Removes duplicates
     - Checks for other empty values such as ""
+    - Transforms the y feature into binary intergers
     """
     # Drop null values
     df = df.dropna()
@@ -21,7 +23,10 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     df = df.drop_duplicates()
 
     # Drop the TotalCharges column
-    df = df.drop(columns=[['TotalCharges', 'Date']])
+    df = df.drop(columns=['TotalCharges', 'customerID'], axis=1)
+
+    #Transforms y
+    df['Churn'] = df['Churn'].astype(int)
 
     return df
 
@@ -43,7 +48,7 @@ def get_data_with_cache(
         print(Fore.BLUE + "\nLoad data from BigQuery server..." + Style.RESET_ALL)
         client = bigquery.Client(project=gcp_project)
         query_job = client.query(query)
-        results = query_job.results()
+        results = query_job.result()
         df = results.to_dataframe()
 
         if df.shape[0] > 1:
@@ -83,13 +88,13 @@ def load_data_to_bq(
     print(f"✅ Data saved to bigquery, with shape {data.shape}")
 
 
-def create_data(source_file: Path, DATE) -> pd.DataFrame:
+def create_data(query, cache_path) -> pd.DataFrame:
     """
     - Creates an artificial dataset based on a source csv as input
     - Edits the date column to reflect the '%Y-%m' of the current date
     """
     num_rows = 2000
-    df = pd.read_csv(source_file)
+    df = get_data_with_cache(gcp_project=PROJECT_ID, query=query, cache_path=cache_path, data_has_header=True)
 
     def generate_artifical_data(df, num_rows):
         artificial_data = pd.DataFrame()
@@ -97,14 +102,12 @@ def create_data(source_file: Path, DATE) -> pd.DataFrame:
         for column in df.columns:
             if df[column].dtype == 'object':
                 artificial_data[column] = np.random.choice(df[column].unique(), num_rows)
-        else:
-            artificial_data[column] = np.random.choice(df[column].values, num_rows)
+            else:
+                artificial_data[column] = np.random.choice(df[column].values, num_rows)
 
         return artificial_data
 
     artificial_data = generate_artifical_data(df, num_rows)
-
-    format_date = DATE.strftime('%Y-%m')
-    artificial_data['Date'] = format_date
+    artificial_data['Date'] = '2024-06'
 
     return artificial_data
