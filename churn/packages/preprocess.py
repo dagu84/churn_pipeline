@@ -5,8 +5,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, FunctionTransformer
 
-from packages.encode import encode, binary_encode
-from packages.params import *
+from churn.packages.encode import encode, binary_encode
+from churn.packages.parameters import *
 
 def preprocess_features(X: pd.DataFrame) -> np.ndarray:
     def create_pipeline() -> ColumnTransformer:

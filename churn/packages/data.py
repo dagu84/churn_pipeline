@@ -4,9 +4,9 @@ from pathlib import Path
 from colorama import Fore, Style
 from google.cloud import bigquery
 
-from packages.params import *
+from churn.packages.parameters import *
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/dg/Desktop/DG/data_science/gcp/projects-cloud-425714-64a3c3d9029b.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_APPLICATION_CREDENTIALS
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -42,10 +42,10 @@ def get_data_with_cache(
     Store at cache_path if retrieved from BigQuery for future use
     """
     if cache_path.is_file():
-        print(Fore.BLUE + "\nLoad data from local CSV..." + Style.RESET_ALL)
+        print(Fore.BLUE + "\nLoading data from local CSV..." + Style.RESET_ALL)
         df = pd.read_csv(cache_path, header='infer' if data_has_header else None)
     else:
-        print(Fore.BLUE + "\nLoad data from BigQuery server..." + Style.RESET_ALL)
+        print(Fore.BLUE + "\nLoading data from BigQuery server..." + Style.RESET_ALL)
         client = bigquery.Client(project=gcp_project)
         query_job = client.query(query)
         results = query_job.result()
@@ -54,7 +54,7 @@ def get_data_with_cache(
         if df.shape[0] > 1:
             df.to_csv(cache_path, header=data_has_header, index=False)
 
-    print(f"✅ Data loaded, with shape {df.shape}")
+    print(f"✅ Data loaded, the shape is {df.shape}")
 
     return df
 
@@ -72,7 +72,7 @@ def load_data_to_bq(
     """
     assert isinstance(data, pd.DataFrame)
     full_table_name = f"{gcp_project}.{bq_dataset}.{table}"
-    print(Fore.BLUE + f"\nSave data to BigQuery @ {full_table_name}...:" + Style.RESET_ALL)
+    print(Fore.BLUE + f"\nSave data to BigQuery {full_table_name}...:" + Style.RESET_ALL)
     data.columns = [f"_{column}" if not str(column)[0].isalpha() and not str(column)[0] == "_" else str(column) for column in data.columns]
 
     client = bigquery.Client()
@@ -85,7 +85,7 @@ def load_data_to_bq(
     job = client.load_table_from_dataframe(data, full_table_name, job_config=job_config)
     result = job.result()
 
-    print(f"✅ Data saved to bigquery, with shape {data.shape}")
+    print(f"✅ Data saved to BigQuery, with shape the {data.shape}")
 
 
 def create_data(query, cache_path) -> pd.DataFrame:

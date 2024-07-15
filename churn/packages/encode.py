@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from packages.params import *
+from churn.packages.parameters import *
 
 def binary_encode(series: pd.DataFrame) -> np.ndarray:
     series = pd.DataFrame(series)

@@ -6,8 +6,8 @@ from dateutil.parser import parse
 from sklearn.model_selection import train_test_split
 import datetime
 
-from packages.params import *
-from packages.registry import save_results, save_model, mlflow_run
+from churn.packages.parameters import *
+from churn.packages.mlflow import save_results, save_model, mlflow_, load_model
 from packages.model import initialise_model, evaluate_model
 from packages.data import clean_data, get_data_with_cache, load_data_to_bq, create_data
 from packages.preprocess import preprocess_features
@@ -86,10 +86,10 @@ def preprocess(min_date:str= '2024-05', max_date:str= '2024-06') -> None:
     return None
 
 
-@mlflow_run
+@mlflow_
 def train(
-        min_date: str = '2024-07',
-        max_date: str = '2024-07',
+        min_date:str = '2024-07',
+        max_date:str = '2024-07',
         split_ratio: float = 0.3,
 
     )-> float:
@@ -147,8 +147,54 @@ def train(
 
     return score
 
+@mlflow_
+def evaluate(min_date:str ='2024-05', max_date:str ='2024-06', stage:str ='Production'):
+    """
 
-def evaluate():
+    """
+    model = load_model()
+    assert model is not None
+
+    min_date = parse(min_date).strftime('%Y-%m')
+    max_date = parse(max_date).strftime('%Y-%m')
+
+    query = f"""
+        SELECT * EXCEPT(_0)
+        FROM `{PROJECT_ID}`.{BQ_DATASET}.processed`
+        WHERE _25 BETWEEN '{min_date}' AND '{max_date}'
+    """
+
+    data_query_cache_path = Path(f"../local_data/customers_{min_date}_{max_date}.csv")
+    data_query = get_data_with_cache(
+        query=query,
+        gcp_project=PROJECT_ID,
+        cache_path=data_query_cache_path,
+        data_has_header=True
+    )
+
+    X = data_query.drop(columns=['_27'])
+    X = X.to_numpy()
+
+    y = data_query['_27']
+    y = y.to_numpy()
+
+    metrics = evaluate_model(model=model, X=X, y=y)
+    accuracy = metrics["accuracy"]
+
+    params = dict(
+            context="evaluate", # Package behavior
+            training_set_size=data_query.shape[0],
+            row_count=len(X)
+        )
+
+    save_results(params=params, metrics=metrics)
+
+    print("✅ evaluation done.")
+
+    return accuracy
+
+
+def predicion():
     pass
 
 

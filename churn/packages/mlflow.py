@@ -1,8 +1,10 @@
 import time
 import mlflow
 import mlflow.sklearn
+from mlflow.tracking import MlflowClient
 from sklearn.linear_model import LogisticRegression
-from packages.params import *
+from churn.packages.parameters import *
+
 
 def save_results(params: dict, metrics: dict) -> None:
     """
@@ -35,11 +37,30 @@ def save_model(model, signature, input):
     return None
 
 
-def mflow_transition_model(current_stage='None', new_staging='Staging'):
-    pass
+def mlflow_transition_model(current_stage:str, new_stage:str):
+    '''
+    Transitions the new model from current_stage to new_stage and archives the old model into the
+    '''
+
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+
+    client = MlflowClient()
+
+    version = client.get_latest_versions(name=MODEL_NAME, stages=[current_stage])
+
+    if not version:
+        print(f"\n❌ No model found with name {MODEL_NAME} in stage {current_stage}")
+        return None
+
+    client.transition_model_version_stage(
+        name=MODEL_NAME, version=version,
+        stage=new_stage,
+        archive_existing_versions=True)
+
+    return print(f"✅ Model {MODEL_NAME} (version {version[0].version}) transitioned from {current_stage} to {new_stage}")
 
 
-def mlflow_run(func):
+def mlflow_(func):
     """
     Generic function to log params and results of to MLflow long with the model
     Args:
@@ -58,3 +79,25 @@ def mlflow_run(func):
             results = func(*args, **kwargs)
 
         print("✅ mlflow_run auto-log done")
+
+
+def load_model(stage='Production') -> LogisticRegression:
+    """
+    Load the 'Production' model from MLflow
+    """
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+
+    client = MlflowClient()
+
+    try:
+        version = client.get_latest_versions(name=MODEL_NAME, stages=[stage])
+        model_uri = version[0].source
+        assert model_uri is not None
+    except:
+        print(f"No model named {MODEL_NAME} found in stage {stage}")
+        return None
+
+    model = mlflow.tensorflow.load_model(model_uri=model_uri)
+    print(f"✅ Model {MODEL_NAME} successfully loaded")
+
+    return model
