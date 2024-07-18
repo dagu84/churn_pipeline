@@ -150,7 +150,7 @@ def train(
 @mlflow_
 def evaluate(min_date:str ='2024-05', max_date:str ='2024-06', stage:str ='Production'):
     """
-
+    Evaluate the current production model.
     """
     model = load_model()
     assert model is not None
@@ -194,8 +194,22 @@ def evaluate(min_date:str ='2024-05', max_date:str ='2024-06', stage:str ='Produ
     return accuracy
 
 
-def predicion():
-    pass
+def predicion(X_pred:pd.DataFrame) -> np.ndarray:
+    """
+    Make a prediction using the most recent model.
+    """
+    if X_pred is None:
+        return None
+
+    model = load_model()
+    assert model is not None
+
+    X_processed = preprocess_features(X_pred)
+    y_pred = model.predict(X_processed)
+
+    print("\n✅ prediction done: ", y_pred, y_pred.shape, "\n")
+
+    return y_pred
 
 
 if __name__ == '__main__':
