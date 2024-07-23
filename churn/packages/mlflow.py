@@ -13,22 +13,21 @@ def save_results(params: dict, metrics: dict) -> None:
     if params is not None:
         mlflow.log_params(params)
     if metrics is not None:
-        mlflow.log_metric(metrics)
+        for key, value in metrics.items():
+            mlflow.log_metric(key, value)
 
     print("✅ Results saved on mlflow")
 
     return None
 
 
-def save_model(model, signature, input):
+def save_model(model):
     """
     - Stores the model to MLflow
     """
     mlflow.sklearn.log_model(
-        model=model,
+        sk_model=model,
         artifact_path='model',
-        signature=signature,
-        input_example=input,
         registered_model_name=MODEL_NAME
     )
 
@@ -79,6 +78,9 @@ def mlflow_(func):
             results = func(*args, **kwargs)
 
         print("✅ mlflow_run auto-log done")
+        return results
+
+    return wrapper
 
 
 def load_model(stage='Production') -> LogisticRegression:

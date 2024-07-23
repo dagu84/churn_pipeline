@@ -27,3 +27,5 @@ COLUMN_NAME_ROWS = ['customerID', 'Date', 'gender', 'SeniorCitizen', 'Partner',
        'Churn']
 
 CURRENT_DATE = datetime.date.today()
+
+LOCAL_PATH = os.environ.get("LOCAL_PATH")

@@ -1,0 +1,40 @@
+artifact_path: model
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.10.6
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.5.0
+mlflow_version: 2.14.1
+model_size_bytes: 1170
+model_uuid: 17f2f2db90964535af9f42ad87ab3059
+run_id: 3466576882e849d48230fb9e4c161bd9
+signature:
+  inputs: '[{"type": "double", "name": "_0", "required": true}, {"type": "double",
+    "name": "_1", "required": true}, {"type": "long", "name": "_2", "required": true},
+    {"type": "long", "name": "_3", "required": true}, {"type": "long", "name": "_4",
+    "required": true}, {"type": "long", "name": "_5", "required": true}, {"type":
+    "long", "name": "_6", "required": true}, {"type": "long", "name": "_7", "required":
+    true}, {"type": "long", "name": "_8", "required": true}, {"type": "long", "name":
+    "_9", "required": true}, {"type": "long", "name": "_10", "required": true}, {"type":
+    "long", "name": "_11", "required": true}, {"type": "long", "name": "_12", "required":
+    true}, {"type": "double", "name": "_13", "required": true}, {"type": "double",
+    "name": "_14", "required": true}, {"type": "double", "name": "_15", "required":
+    true}, {"type": "double", "name": "_16", "required": true}, {"type": "double",
+    "name": "_17", "required": true}, {"type": "double", "name": "_18", "required":
+    true}, {"type": "double", "name": "_19", "required": true}, {"type": "double",
+    "name": "_20", "required": true}, {"type": "double", "name": "_21", "required":
+    true}, {"type": "double", "name": "_22", "required": true}, {"type": "double",
+    "name": "_23", "required": true}, {"type": "double", "name": "_24", "required":
+    true}, {"type": "long", "name": "_26", "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "int64", "shape": [-1]}}]'
+  params: null
+utc_time_created: '2024-07-23 12:28:26.483575'
