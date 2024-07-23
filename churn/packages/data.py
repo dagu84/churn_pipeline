@@ -6,7 +6,7 @@ from google.cloud import bigquery
 
 from churn.packages.parameters import *
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_APPLICATION_CREDENTIALS
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/dg/Desktop/DG/data_science/gcp/projects-cloud-425714-64a3c3d9029b.json'
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -93,7 +93,7 @@ def create_data(query, cache_path) -> pd.DataFrame:
     - Creates an artificial dataset based on a source csv as input
     - Edits the date column to reflect the '%Y-%m' of the current date
     """
-    num_rows = 2000
+    num_rows = 7000
     df = get_data_with_cache(gcp_project=PROJECT_ID, query=query, cache_path=cache_path, data_has_header=True)
 
     def generate_artifical_data(df, num_rows):
@@ -108,6 +108,8 @@ def create_data(query, cache_path) -> pd.DataFrame:
         return artificial_data
 
     artificial_data = generate_artifical_data(df, num_rows)
+
+    # Hard coded the date for now
     artificial_data['Date'] = '2024-06'
 
     return artificial_data

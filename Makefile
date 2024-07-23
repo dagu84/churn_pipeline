@@ -15,4 +15,7 @@ train_model:
 evaluate_model:
 	python -c 'from churn.main import evaluate; evaluate()'
 
+predict_data:
+	python -c 'from churn.main import prediction; prediction()'
+
 ############### TESTS ###############

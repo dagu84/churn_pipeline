@@ -8,9 +8,9 @@ import datetime
 
 from churn.packages.parameters import *
 from churn.packages.mlflow import save_results, save_model, mlflow_, load_model
-from packages.model import initialise_model, evaluate_model
-from packages.data import clean_data, get_data_with_cache, load_data_to_bq, create_data
-from packages.preprocess import preprocess_features
+from churn.packages.model import initialise_model, evaluate_model
+from churn.packages.data import clean_data, get_data_with_cache, load_data_to_bq, create_data
+from churn.packages.preprocess import preprocess_features
 
 
 def data_pipeline(date:datetime = CURRENT_DATE) -> None:
@@ -26,7 +26,7 @@ def data_pipeline(date:datetime = CURRENT_DATE) -> None:
         WHERE Date = '2024-07'
     """
 
-    data = create_data(query=query, cache_path=Path('../local_data/customers_07_2024.csv'))
+    data = create_data(query=query, cache_path=Path(LOCAL_PATH).joinpath(f"customers_06_2024.csv"))
 
     load_data_to_bq(data=data,
         gcp_project=PROJECT_ID,
@@ -38,7 +38,7 @@ def data_pipeline(date:datetime = CURRENT_DATE) -> None:
 
 
 
-def preprocess(min_date:str= '2024-05', max_date:str= '2024-06') -> None:
+def preprocess(min_date:str= '2024-07', max_date:str= '2024-07') -> None:
     """
     - Query the raw dataset from the BigQuery Dataset
     - Cache query results as a locl csv if it doesn't already exist locally
@@ -57,7 +57,7 @@ def preprocess(min_date:str= '2024-05', max_date:str= '2024-06') -> None:
     """
 
     #Fetch data
-    data_query_cache_path = Path(f"../local_data/customers_{min_date}_{max_date}.csv")
+    data_query_cache_path = Path(LOCAL_PATH).joinpath(f"customers_{min_date}_{max_date}.csv")
     data_query = get_data_with_cache(
         query=query,
         gcp_project=PROJECT_ID,
@@ -104,13 +104,13 @@ def train(
     print(Fore.BLUE + "\nLoading preprocessed validation data..." + Style.RESET_ALL)
 
     query = f"""
-        SELECT {",".join(COLUMN_NAME_ROWS)}
+        SELECT *
         FROM `{PROJECT_ID}.{BQ_DATASET}.processed`
-        WHERE Date = '{min_date}'
-        ORDER BY Date
+        WHERE _25 = '{min_date}'
+        ORDER BY _25
     """
 
-    data_processed_cache_path = Path(f"../local_data/processsed_{min_date}_{max_date}.csv")
+    data_processed_cache_path = Path(LOCAL_PATH).joinpath(f"processed_{min_date}_{max_date}.csv")
     data_processed = get_data_with_cache(
         query=query,
         gcp_project=PROJECT_ID,
@@ -122,10 +122,10 @@ def train(
         print("❌ Not enough processed data retrieved to train on")
         return None
 
-    X = data_processed.drop(column='_27')
+    X = data_processed.drop(columns=['_25','_27'])
     y = data_processed[['_27']]
 
-    X_train, X_test, y_train, y_test = train_test_split(X=X, y=y, test_size=split_ratio, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=split_ratio, random_state=42)
 
     model = initialise_model()
     model.fit(X_train, y_train)
@@ -139,7 +139,11 @@ def train(
         row_count=len(X_train)
     )
 
-    save_results(params=params, metrics=dict(accuracy=score))
+    metrics = dict(
+        key=score
+    )
+
+    save_results(params=params, metrics=metrics)
 
     save_model(model=model)
 
@@ -182,7 +186,7 @@ def evaluate(min_date:str ='2024-05', max_date:str ='2024-06', stage:str ='Produ
     accuracy = metrics["accuracy"]
 
     params = dict(
-            context="evaluate", # Package behavior
+            context="evaluate",
             training_set_size=data_query.shape[0],
             row_count=len(X)
         )
@@ -212,7 +216,11 @@ def predicion(X_pred:pd.DataFrame) -> np.ndarray:
     return y_pred
 
 
+
+
+
 if __name__ == '__main__':
     #preprocess(min_date='2024-07', max_date='2024-07')
     #data_pipeline()
+    #train()
     pass
