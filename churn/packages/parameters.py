@@ -18,6 +18,11 @@ MODEL_NAME = os.environ.get("MODEL_NAME")
 MLFLOW_TRACKING_URI = os.environ.get("MLFLOW_TRACKING_URI")
 MFLOW_EXPERIEMENT = os.environ.get("MFLOW_EXPERIEMENT")
 
+# Prefect
+API_KEY = os.environ.get("API_KEY")
+PREFECT_FLOW_NAME = os.environ.get("PREFECT_FLOW_NAME")
+PREFECT_LOG_LEVEL = os.environ.get("PREFECT_LOG_LEVEL")
+
 ####### CONTSANTS #######
 COLUMN_NAME_ROWS = ['customerID', 'Date', 'gender', 'SeniorCitizen', 'Partner',
        'Dependents', 'tenure', 'PhoneService', 'MultipleLines',
@@ -27,5 +32,4 @@ COLUMN_NAME_ROWS = ['customerID', 'Date', 'gender', 'SeniorCitizen', 'Partner',
        'Churn']
 
 CURRENT_DATE = datetime.date.today()
-
 LOCAL_PATH = os.environ.get("LOCAL_PATH")
