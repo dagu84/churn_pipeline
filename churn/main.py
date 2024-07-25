@@ -90,7 +90,7 @@ def preprocess(min_date:str= '2024-07', max_date:str= '2024-07') -> None:
 def train(
         min_date:str = '2024-07',
         max_date:str = '2024-07',
-        split_ratio: float = 0.3,
+        split_ratio:float = 0.3,
 
     )-> float:
     """
@@ -156,7 +156,7 @@ def evaluate(min_date:str ='2024-05', max_date:str ='2024-06', stage:str ='Produ
     """
     Evaluate the current production model.
     """
-    model = load_model()
+    model = load_model(stage=stage)
     assert model is not None
 
     min_date = parse(min_date).strftime('%Y-%m')
@@ -214,9 +214,6 @@ def predicion(X_pred:pd.DataFrame) -> np.ndarray:
     print("\n✅ prediction done: ", y_pred, y_pred.shape, "\n")
 
     return y_pred
-
-
-
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ from google.cloud import bigquery
 
 from churn.packages.parameters import *
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/dg/Desktop/DG/data_science/gcp/projects-cloud-425714-64a3c3d9029b.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_APPLICATION_CREDENTIALS
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
